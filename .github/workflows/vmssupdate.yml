@@ -25,12 +25,12 @@ jobs:
       run: dotnet test --no-build --verbosity normal
       working-directory: ./app
     - name: Publish
-      run: dotnet publish app/app.csproj -c Release -o website
+      run: dotnet publish app/app.csproj -c Release -o publishedapp
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: app
-        path: app/website/**
+        name: publishedapp
+        path: publishedapp/**
         if-no-files-found: error
     - uses: azure/login@v1
       with:
