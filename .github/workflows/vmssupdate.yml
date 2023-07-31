@@ -49,9 +49,18 @@ jobs:
       uses: azure/CLI@v1
       with:
         inlineScript: |
-          az storage blob upload-batch -d ${{ secrets.STORAGE_CONTAINER_NAME}} --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --source artifacts
-    - name: Update VMSS 
-      uses: azure/CLI@v1
-      with:
-        inlineScript: |
-          az vmss update -n riflelvmss -g vmss
+          az storage blob upload-batch -d ${{ secrets.STORAGE_CONTAINER_NAME}} \
+          --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} \
+          --destination-path $APPVERSION \
+          --source artifacts 
+    # Logout from Azure
+    - name: logout
+      run: |
+            az logout
+      if: always()
+
+    # - name: Update VMSS 
+    #   uses: azure/CLI@v1
+    #   with:
+    #     inlineScript: |
+    #       az vmss update -n riflelvmss -g vmss
