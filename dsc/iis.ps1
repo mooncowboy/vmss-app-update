@@ -25,4 +25,4 @@
 # SOFTWARE.
 
 Add-WindowsFeature Web-Server
-Set-Content -Path "C:\inetpub\wwwroot\Default.htm" -Value "Hello VMSS 11 World from host $($env:computername) !"
+Set-Content -Path "C:\inetpub\wwwroot\Default.htm" -Value "Hello VMSS 12 World from host $($env:computername) !"
