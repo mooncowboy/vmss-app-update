@@ -49,7 +49,7 @@ jobs:
       uses: azure/CLI@v1
       with:
         inlineScript: |
-          az storage blob upload-batch -d ${{ secrets.STORAGE_CONTAINER_NAME}} --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --source artifacts/publishedapp.zip
+          az storage blob upload-batch -d ${{ secrets.STORAGE_CONTAINER_NAME}} --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --source artifacts
     - name: Update VMSS 
       uses: azure/CLI@v1
       with:
