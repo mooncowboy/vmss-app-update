@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      APPVERSION: ${{ github.run_id }}-${{ github.run_attempt }}
     steps:
     - uses: actions/checkout@v3
     - uses: actions/checkout@v3
@@ -26,11 +28,15 @@ jobs:
       working-directory: ./app
     - name: Publish
       run: dotnet publish app/app.csproj -c Release -o publishedapp
+    - name: Zip Published App
+      uses: montudor/action-zip@v1
+      with:
+        args: zip -qq -r publishedapp.zip publishedapp/**
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3
       with:
         name: publishedapp
-        path: publishedapp/**
+        path: publishedapp.zip
         if-no-files-found: error
     - uses: azure/login@v1
       with:
