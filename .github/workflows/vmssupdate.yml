@@ -17,10 +17,13 @@ jobs:
         dotnet-version: 7.0.x
     - name: Restore dependencies
       run: dotnet restore
+      working-directory: ./app
     - name: Build
       run: dotnet build --no-restore
+      working-directory: ./app
     - name: Test
       run: dotnet test --no-build --verbosity normal
+      working-directory: ./app
     - name: Publish
       run: dotnet publish app/app.csproj -c Release -o website
     - name: Upload a Build Artifact
