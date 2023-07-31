@@ -1,4 +1,4 @@
-# From https://github.com/Azure-Samples/compute-automation-configurations
+# Based on https://github.com/Azure-Samples/compute-automation-configurations
 
 #!/bin/bash
 
