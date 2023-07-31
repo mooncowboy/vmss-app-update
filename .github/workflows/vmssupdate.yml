@@ -28,19 +28,28 @@ jobs:
       working-directory: ./app
     - name: Publish
       run: dotnet publish app/app.csproj -c Release -o publishedapp
+    - name: Create artifact directory
+      run: mkdir -p artifacts
     - name: Zip Published App
       uses: montudor/action-zip@v1
       with:
-        args: zip -qq -r publishedapp.zip . -i publishedapp/**
+        args: zip -qq -r artifacts/publishedapp.zip . -i publishedapp/**
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3
       with:
         name: publishedapp
-        path: publishedapp.zip
+        path: artifacts/publishedapp.zip
         if-no-files-found: error
+    
     - uses: azure/login@v1
       with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+    # Upload to Blob Storage
+    - name: Upload to Blob Storage
+      uses: azure/CLI@v1
+      with:
+        inlineScript: |
+          az storage blob upload-batch -d ${{ secrets.STORAGE_CONTAINER_NAME}} --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --source artifacts/publishedapp.zip
     - name: Update VMSS 
       uses: azure/CLI@v1
       with:
