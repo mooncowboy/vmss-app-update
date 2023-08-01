@@ -44,7 +44,7 @@ jobs:
     - name: Zip Published App
       uses: montudor/action-zip@v1
       with:
-        args: cd publishedapp && zip -qq -r ../artifacts/publishedapp.zip .
+        args: zip -qq -r artifacts/publishedapp.zip . -i publishedapp/**
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3
       with:
