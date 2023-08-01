@@ -1,0 +1,1 @@
+Expand-Archive -LiteralPath updateapp.ps1 -DestinationPath C:\inetpub\wwwroot
