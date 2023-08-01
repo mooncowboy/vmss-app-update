@@ -74,7 +74,7 @@ jobs:
           --name $APPVERSION/publishedapp.zip \
           --expiry $SASEXPIRY \
           --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }}} \
-          --permissions r --https-only --full-uri --output tsv)" >> $GITHUB_ENV
+          --permissions r --https-only --full-uri --output tsv)" >> $GITHUB_OUTPUT
       id: appSasToken
     # Generate SAS token for the uploaded artifacts - Script
     - name: Generate SAS token - ps1 script
@@ -86,7 +86,7 @@ jobs:
           --name $APPVERSION/updateapp.ps1 \
           --expiry $SASEXPIRY \
           --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }}} \
-          --permissions r --https-only --full-uri --output tsv)" >> $GITHUB_ENV
+          --permissions r --https-only --full-uri --output tsv)" >> $GITHUB_OUTPUT
       id: ps1SasToken
     # Set the updated customScript extension to run on the VMSS
     - name: Set VMSS custom script extension
