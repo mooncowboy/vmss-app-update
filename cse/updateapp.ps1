@@ -1,2 +1,2 @@
 # Extract the published app to the webroot
-Expand-Archive -Path .\publishedapp.zip -Force 
+Expand-Archive -Path .\publishedapp.zip -DestinationPath c:\inetpub\wwwroot -Force 
