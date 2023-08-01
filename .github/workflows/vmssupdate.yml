@@ -69,25 +69,23 @@ jobs:
       uses: azure/CLI@v1
       with:
         inlineScript: |
-          echo "token=$(az storage blob generate-sas --container-name ${{ secrets.STORAGE_CONTAINER_NAME }} \
+          echo "uri=$(az storage blob url --container-name ${{ secrets.STORAGE_CONTAINER_NAME }} \
           --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} \
           --name $APPVERSION/publishedapp.zip \
-          --expiry $SASEXPIRY \
           --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }}} \
-          --permissions r --https-only --full-uri --output tsv)" >> $GITHUB_OUTPUT
-      id: appSasToken
+          --output tsv)" >> $GITHUB_OUTPUT
+      id: appSasUri
     # Generate SAS token for the uploaded artifacts - Script
     - name: Generate SAS token - ps1 script
       uses: azure/CLI@v1
       with:
         inlineScript: |
-          echo "token=$(az storage blob generate-sas --container-name ${{ secrets.STORAGE_CONTAINER_NAME }} \
+          echo "uri=$(az storage blob url --container-name ${{ secrets.STORAGE_CONTAINER_NAME }} \
           --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} \
           --name $APPVERSION/updateapp.ps1 \
-          --expiry $SASEXPIRY \
           --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }}} \
-          --permissions r --https-only --full-uri --output tsv)" >> $GITHUB_OUTPUT
-      id: ps1SasToken
+          --output tsv)" >> $GITHUB_OUTPUT
+      id: ps1SasUri
     # Set the updated customScript extension to run on the VMSS
     - name: Set VMSS custom script extension
       uses: azure/CLI@v1
@@ -99,10 +97,12 @@ jobs:
           --name CustomScriptExtension \
           --vmss-name ${{ secrets.VMSS_NAME }} \
           --resource-group ${{ secrets.VMSS_RG_NAME }} \
-          --settings '{"fileUris": [ \
-            "${{ steps.appSasToken.outputs.token }}", \
-            "${{ steps.ps1SasToken.outputs.token }}" \
+          --protected-settings '{"fileUris": [ \
+            "${{ steps.ps1SasUri.outputs.uri }}", \
+            "${{ steps.appSasUri.outputs.uri }}" \
             ], \
+            "storageAccountName": "${{ secrets.STORAGE_ACCOUNT_NAME }}", \
+            "storageAccountKey": "${{ secrets.STORAGE_ACCOUNT_KEY }}", \
             "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted dir > c:\\temp\\dir.txt"}'
     # Logout from Azure
     - name: logout
