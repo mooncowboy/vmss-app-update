@@ -69,24 +69,24 @@ jobs:
       uses: azure/CLI@v1
       with:
         inlineScript: |
-          az storage blob generate-sas --container-name ${{ secrets.STORAGE_CONTAINER_NAME }} \
+          echo "token=$(az storage blob generate-sas --container-name ${{ secrets.STORAGE_CONTAINER_NAME }} \
           --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} \
           --name $APPVERSION/publishedapp.zip \
           --expiry $SASEXPIRY \
           --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }}} \
-          --permissions r --https-only --full-uri --output tsv
+          --permissions r --https-only --full-uri --output tsv)" >> $GITHUB_ENV
       id: appSasToken
     # Generate SAS token for the uploaded artifacts - Script
     - name: Generate SAS token - ps1 script
       uses: azure/CLI@v1
       with:
         inlineScript: |
-          az storage blob generate-sas --container-name ${{ secrets.STORAGE_CONTAINER_NAME }} \
+          echo "token=$(az storage blob generate-sas --container-name ${{ secrets.STORAGE_CONTAINER_NAME }} \
           --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} \
           --name $APPVERSION/updateapp.ps1 \
           --expiry $SASEXPIRY \
           --account-key ${{ secrets.STORAGE_ACCOUNT_KEY }}} \
-          --permissions r --https-only --full-uri --output tsv
+          --permissions r --https-only --full-uri --output tsv)" >> $GITHUB_ENV
       id: ps1SasToken
     # Set the updated customScript extension to run on the VMSS
     - name: Set VMSS custom script extension
@@ -100,8 +100,8 @@ jobs:
           --vmss-name ${{ secrets.VMSS_NAME }} \
           --resource-group ${{ secrets.VMSS_RG_NAME }} \
           --settings '{"fileUris": [ \
-            "${{ steps.appSasToken.outputs[0] }}", \
-            "${{ steps.ps1SasToken.outputs[0] }}" \
+            "${{ steps.appSasToken.outputs.token }}", \
+            "${{ steps.ps1SasToken.outputs.token }}" \
             ], \
             "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File updateapp.ps1"}'
     # Logout from Azure
