@@ -104,7 +104,7 @@ jobs:
             ], \
             "storageAccountName": "${{ secrets.STORAGE_ACCOUNT_NAME }}", \
             "storageAccountKey": "${{ secrets.STORAGE_ACCOUNT_KEY }}", \
-            "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File updateapp.ps1" \
+            "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted dir > c:\temp\dir.txt" \
             }'
     # Logout from Azure
     - name: logout
