@@ -97,13 +97,15 @@ jobs:
           --name CustomScriptExtension \
           --vmss-name ${{ secrets.VMSS_NAME }} \
           --resource-group ${{ secrets.VMSS_RG_NAME }} \
+          --settings '{}' \
           --protected-settings '{"fileUris": [ \
             "${{ steps.ps1SasUri.outputs.uri }}", \
             "${{ steps.appSasUri.outputs.uri }}" \
             ], \
             "storageAccountName": "${{ secrets.STORAGE_ACCOUNT_NAME }}", \
             "storageAccountKey": "${{ secrets.STORAGE_ACCOUNT_KEY }}", \
-            "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted dir > c:\\temp\\dir.txt"}'
+            "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File updateapp.ps1" \
+            }'
     # Logout from Azure
     - name: logout
       run: |
