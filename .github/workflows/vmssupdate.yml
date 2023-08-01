@@ -103,7 +103,7 @@ jobs:
             "${{ steps.appSasToken.outputs.token }}", \
             "${{ steps.ps1SasToken.outputs.token }}" \
             ], \
-            "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File updateapp.ps1"}'
+            "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted dir > c:\\temp\\dir.txt"}'
     # Logout from Azure
     - name: logout
       run: |
