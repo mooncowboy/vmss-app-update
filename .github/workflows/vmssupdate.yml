@@ -100,8 +100,8 @@ jobs:
           --vmss-name ${{ secrets.VMSS_NAME }} \
           --resource-group ${{ secrets.VMSS_RG_NAME }} \
           --settings '{"fileUris": [ \
-            "${{ steps.appSasToken.outputs }}", \
-            "${{ steps.ps1SasToken.outputs }}" \
+            "${{ steps.appSasToken.outputs[0] }}", \
+            "${{ steps.ps1SasToken.outputs[0] }}" \
             ], \
             "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File updateapp.ps1"}'
     # Logout from Azure
