@@ -14,7 +14,8 @@ jobs:
       run: |
         echo "APPVERSION=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
         echo "SASEXPIRY=$(date -u -d '+6 months' +'%Y-%m-%dT%H:%MZ')" >> $GITHUB_ENV
-    - uses: actions/checkout@v3
+    
+    # Checkout the repo
     - uses: actions/checkout@v3
 
     # Build, test, and publish the app
@@ -95,7 +96,7 @@ jobs:
           az vmss extension set \
           --publisher Microsoft.Compute \
           --version 1.10 \
-          --name CustomScript \
+          --name CustomScriptExtension \
           --vmss-name ${{ secrets.VMSS_NAME }} \
           --resource-group ${{ secrets.VMSS_RG_NAME }} \
           --settings '{"fileUris": [ \
