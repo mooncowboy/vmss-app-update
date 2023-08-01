@@ -34,6 +34,8 @@ jobs:
       working-directory: ./app
     - name: Publish
       run: dotnet publish app/app.csproj -c Release -o publishedapp
+    - name: DEBUG only - print the contents of the publishedapp directory
+      run: ls -R publishedapp
 
     # Add the published app to a ZIP file, create artifacts including the scripts to run on the VMSS
     - name: Create artifact directory
