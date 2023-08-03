@@ -4,6 +4,19 @@ This sample provides an example of how to use Custom Script Extenion to update a
 
 It should not be treated as production-ready code, consider this an example only. Where applicable, links are included to the official docs for further reference.
 
+Before you begin, there are [working examples for Linux](https://learn.microsoft.com/en-us/azure/virtual-machine-scale-sets/tutorial-install-apps-cli) and [Windows](https://learn.microsoft.com/en-us/azure/virtual-machine-scale-sets/tutorial-install-apps-powershell) which I strongly recommend going through. This repo build on those examples (using Azure CLI and Windows), adds a custom image to minimize app update time and also adds CI/CD through GitHub Actions.
+
+**A quick and important note**: CustomScriptExtension is different for Windows and Linux. Consider this when looking at the examples.
+  * Windows: 
+    * publisher "Microsoft.Compute"
+    * type "CustomScriptExtension"
+    * version "1.10"
+  * Linux
+    * publisher "Microsoft.Azure.Extensions"
+    * type "CustomScript"
+    * version "2.0"
+  
+
 # Table of Contents
 
 - [Azure Scale Set (VMSS) app update with Custom Script Extension (Windows)](#azure-scale-set-vmss-app-update-with-custom-script-extension-windows)
@@ -14,10 +27,11 @@ It should not be treated as production-ready code, consider this an example only
     - [Using this repo with Flexible mode](#using-this-repo-with-flexible-mode)
 - [Required Azure infrastructure for this example](#required-azure-infrastructure-for-this-example)
 - [Creating the required Azure infrastructure](#creating-the-required-azure-infrastructure)
-  - [Windows VM with IIS and ASP.NET Core](#windows-vm-with-iis-and-aspnet-core)
-  - [Adding the VM image to a gallery](#adding-the-vm-image-to-a-gallery)
-  - [Virtual Machine Scale Set](#virtual-machine-scale-set)
-  - [Load Balancer](#load-balancer)
+  - [1. Create a Windows Virtual Machine](#1-create-a-windows-virtual-machine)
+  - [2. Add the VM to an Image Gallery](#2-add-the-vm-to-an-image-gallery)
+  - [3. Create the Scale Set](#3-create-the-scale-set)
+  - [4. Configure Rolling Upgrades](#4-configure-rolling-upgrades)
+  - [5. Configure GitHub Actions](#5-configure-github-actions)
 - [(Optional) - local run of the ASP.NET app](#optional---local-run-of-the-aspnet-app)
 - [Behind the scenes](#behind-the-scenes)
 - [Screenshots](#screenshots)
@@ -57,29 +71,56 @@ Stil, if you want to do it, include that command in the [workflow](.github/workf
 * A Virtual Machine image in a gallery. This VM image should have IIS and ASP.NET Core installed.
 * An Azure VMSS created with Uniform mode and Rolling Upgrade policy.
 * An Azure Load Balancer with a public IP or an Application Gateway that exposes a public endpoint and has a backend pool configured for the VMSS instances.
-* (Optional) An Azure Bastion if you want to RDP into the individual instances (can be useful for debugging)
+* (Optional) An [Azure Bastion](https://learn.microsoft.com/en-us/azure/bastion/bastion-overview) if you want to RDP into the individual instances (can be useful for debugging)
 
 # Creating the required Azure infrastructure
 
-Note: best practice would be to use IaC (infrastructure as code) to provision the required infrastructure. For this example, I didn't use it but you can look for examples in the official docs. 
 
-## Windows VM with IIS and ASP.NET Core
+## 1. Create a Windows Virtual Machine
 
-TBD
+Follow the steps in [Create a Windows Virtual Machine](https://learn.microsoft.com/en-us/azure/virtual-machines/windows/quick-create-cli)
 
-## Adding the VM image to a gallery
+- This will also install IIS and open port 80 
+  
+- Make sure this is running properly
 
-Note: this step is not really mandatory and the ps1 script used in Custom Script Extenion could install all the required services and software to run the application. However, having a custom image significantly reduces startup, scaling and updating time of the VMSS.
+## 2. Add the VM to an Image Gallery
 
-TBD
+*NOTE: This step is not really necessary, you can use one of the provided base images to create a Scale Set. However, by having the required services and software pre-installed, using a custom image will significantly reduce the startup, scale-out and updating time of the scale set.*
 
-## Virtual Machine Scale Set
+- [Create an image gallery](https://learn.microsoft.com/en-us/azure/virtual-machine-scale-sets/tutorial-use-custom-image-cli#create-an-image-gallery)
+- [Create an image definition](https://learn.microsoft.com/en-us/azure/virtual-machine-scale-sets/tutorial-use-custom-image-cli#create-an-image-definition)
+- [Create the image version](https://learn.microsoft.com/en-us/azure/virtual-machine-scale-sets/tutorial-use-custom-image-cli#create-the-image-version)
+    
+    - Replace the value of `--managed-image` in this example with the ID of your VM from Step 1.
 
-TBD
+## 3. Create the Scale Set
 
-## Load Balancer
+Follow the steps in the [Deploy apps to a scale set](https://learn.microsoft.com/en-us/azure/virtual-machine-scale-sets/tutorial-install-apps-cli) docs while making the following changes:
 
-Note: you can use an Azure Load Balancer or an Azure Application Gateway. For this example, I used an Azure Load Balancer.
+* When (creating the scale set)[https://learn.microsoft.com/en-us/azure/virtual-machine-scale-sets/tutorial-install-apps-cli#create-a-scale-set]:
+  * use `--orchestration-mode Uniform`
+  * use `--image "/subscriptions/<Subscription ID>/resourceGroups/myGalleryRG/providers/Microsoft.Compute/galleries/myGallery/images/myImageDefinition"` (or the custom image you created before)
+
+* **NOTE:** You can skip the custom script extenion as this will be added by the GitHub Actions workflow. 
+
+## 4. Configure Rolling Upgrades
+
+You can do this via CLI during the creation of the scale or in the portal afterwards. In this example, for testing purposes, I've set the sliders to 50% so half of the images are updated in each batch.
+
+![Alt text](images/vmss6.png)
+
+
+## 5. Configure GitHub Actions
+
+You can get your Azure Credentials by following this: https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blobs-static-site-github-actions?tabs=userlevel#generate-deployment-credentials 
+
+Once you have those credentials:
+
+* Fork this repo
+* Add the required repos secrets
+
+![Alt text](images/vmss7.png)
 
 # (Optional) - local run of the ASP.NET app
 
@@ -93,7 +134,7 @@ dotnet run
 
 # Behind the scenes
 
-The GitHub Actions [workflow](.github/workflows/vmssupdate.yml) should be relatively easy to follow and I've added some comments there. Still, here's some noteworthy steps. Also, if you're using Azure DevOps, you can use the `az cli` commands like they're used here or check if there's specific Azure DevOps tasks for the job, but I won't cover that here.
+The GitHub Actions [workflow](.github/workflows/vmssupdate.yml) should be relatively easy to follow and I've added some comments there. Also, if you're using Azure DevOps, you can use the `az cli` commands like they're used here or check if there's specific Azure DevOps tasks for the job, but I won't cover that here.
 
 # Screenshots
 
